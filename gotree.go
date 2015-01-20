@@ -23,6 +23,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -85,7 +86,19 @@ func Tree(root string) error {
 	return tree(root, info, 0)
 }
 
+func validateArgs() error {
+	if len(os.Args) != 2 {
+		return errors.New("Usage: " + os.Args[0] + " <directory>")
+	}
+	return nil
+}
+
 func main() {
-	// TODO: arg validation
-	Tree(os.Args[1])
+	if err := validateArgs(); err != nil {
+		fmt.Println(err)
+	} else {
+		if err := Tree(os.Args[1]); err != nil {
+			fmt.Println(err)
+		}
+	}
 }
