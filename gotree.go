@@ -42,8 +42,8 @@ func readDirNames(dirname string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	names, err := f.Readdirnames(-1)
-	f.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -64,19 +64,19 @@ func tree(path string, info os.FileInfo, n int) error {
 		fileInfo, err := os.Lstat(filename)
 		if err != nil {
 			return err
-		} else {
-			show(fileInfo.Name(), n)
-			err = tree(filename, fileInfo, n+1)
-			if err != nil {
-				if !fileInfo.IsDir() {
-					return err
-				}
+		}
+		show(fileInfo.Name(), n)
+		err = tree(filename, fileInfo, n+1)
+		if err != nil {
+			if !fileInfo.IsDir() {
+				return err
 			}
 		}
 	}
 	return nil
 }
 
+// Tree displays the file tree structure.
 func Tree(root string) error {
 	info, err := os.Lstat(root)
 	if err != nil {
@@ -93,12 +93,18 @@ func validateArgs() error {
 	return nil
 }
 
+func errorAndExit(err error) {
+	fmt.Println(err)
+	os.Exit(1)
+}
+
 func main() {
-	if err := validateArgs(); err != nil {
-		fmt.Println(err)
-	} else {
-		if err := Tree(os.Args[1]); err != nil {
-			fmt.Println(err)
-		}
+	err := validateArgs()
+	if err != nil {
+		errorAndExit(err)
+	}
+	err = Tree(os.Args[1])
+	if err != nil {
+		errorAndExit(err)
 	}
 }
