@@ -1,11 +1,10 @@
-gotree
-======
-A simple tree command written in Go
+# gotree
+A simple tree command written in Go.
 
-How to build
-------------
+## How to build
 `go build gotree.go`
 
-Usage
------
-`./gotree <directory>`
+## Usage
+```
+./gotree <directory> [level]
+```

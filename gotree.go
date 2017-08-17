@@ -28,6 +28,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 )
 
 func show(path string, n int) {
@@ -51,7 +52,10 @@ func readDirNames(dirname string) ([]string, error) {
 	return names, nil
 }
 
-func tree(path string, info os.FileInfo, n int) error {
+func tree(path string, info os.FileInfo, level *int, n int) error {
+	if level != nil && n == *level {
+		return nil
+	}
 	if !info.IsDir() {
 		return nil
 	}
@@ -66,7 +70,7 @@ func tree(path string, info os.FileInfo, n int) error {
 			return err
 		}
 		show(fileInfo.Name(), n)
-		err = tree(filename, fileInfo, n+1)
+		err = tree(filename, fileInfo, level, n+1)
 		if err != nil {
 			if !fileInfo.IsDir() {
 				return err
@@ -77,18 +81,18 @@ func tree(path string, info os.FileInfo, n int) error {
 }
 
 // Tree displays the file tree structure.
-func Tree(root string) error {
+func Tree(root string, level *int) error {
 	info, err := os.Lstat(root)
 	if err != nil {
 		return err
 	}
 	fmt.Println(root)
-	return tree(root, info, 0)
+	return tree(root, info, level, 0)
 }
 
 func validateArgs() error {
-	if len(os.Args) != 2 {
-		return errors.New("Usage: " + os.Args[0] + " <directory>")
+	if len(os.Args) < 2 || len(os.Args) > 3 {
+		return errors.New("Usage: " + os.Args[0] + " <directory> [level]")
 	}
 	return nil
 }
@@ -103,7 +107,15 @@ func main() {
 	if err != nil {
 		errorAndExit(err)
 	}
-	err = Tree(os.Args[1])
+	var level *int
+	if len(os.Args) == 3 {
+		lvl, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			errorAndExit(err)
+		}
+		level = &lvl
+	}
+	err = Tree(os.Args[1], level)
 	if err != nil {
 		errorAndExit(err)
 	}
